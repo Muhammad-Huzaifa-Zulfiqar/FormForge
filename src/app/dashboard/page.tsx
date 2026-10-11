@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
@@ -20,7 +21,7 @@ async function signOut() {
   redirect('/login')
 }
 
-export default async function Dashboard() {
+async function DashboardContent() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login') // authentication gate
@@ -51,5 +52,13 @@ export default async function Dashboard() {
         {(forms ?? []).length === 0 && <li className="text-sm text-gray-500">No forms yet.</li>}
       </ul>
     </main>
+  )
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<main className="mx-auto max-w-2xl p-6 text-sm text-gray-500">Loading...</main>}>
+      <DashboardContent />
+    </Suspense>
   )
 }
